@@ -1,0 +1,12 @@
+[Unit]
+Description=Mastodon internal docker network
+PartOf=mastodon.service
+Requires=docker.socket
+After=docker.socket
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=mastodon
+ExecStart=/usr/bin/docker network create --internal --subnet 10.0.0.0/24 mastodon-net-internal
+ExecStop=/usr/bin/docker network rm mastodon-net-internal

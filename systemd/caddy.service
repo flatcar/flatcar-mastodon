@@ -1,0 +1,28 @@
+[Unit]
+Description=Caddy web server front-end and HTTPS termination for Mastodon
+Requires=mastodon-net-external.service
+After=mastodon-net-external.service
+
+[Service]
+WorkingDirectory=/opt/caddy
+User=www
+ExecStart=/usr/bin/docker run --rm  --network=mastodon-net-external \
+                              --volume=/opt/caddy/etc:/etc/caddy \
+                              --volume=/opt/caddy/logs:/logs \
+                              --volume=/opt/caddy/data:/data \
+                              --volume=/opt/caddy/config:/config \
+                              --volume=/opt/mastodon/public:/srv/mastodon/public \
+                              --hostname=flatcar.social \
+                              --name=caddy-webserver \
+                              -p 80:80 \
+                              -p 443:443 \
+                              caddy:2-alpine
+ExecStop=/usr/bin/docker stop caddy-webserver
+
+[Install]
+WantedBy=multi-user.target
+
+# If this unit fails, update-engine will not be started.
+# This will trigger an automatic roll-back should an
+#  update ever break this unit.
+RequiredBy=update-engine.service

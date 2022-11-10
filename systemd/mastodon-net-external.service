@@ -1,0 +1,12 @@
+[Unit]
+Description=Mastodon external docker network
+PartOf=mastodon.service
+Requires=docker.socket
+After=docker.socket
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=mastodon
+ExecStart=/usr/bin/docker network create --subnet 192.168.1.0/24 mastodon-net-external
+ExecStop=/usr/bin/docker network rm mastodon-net-external

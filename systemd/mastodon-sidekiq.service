@@ -1,0 +1,23 @@
+[Unit]
+Description=Mastodon Sidekiq
+PartOf=mastodon.service
+Requires=mastodon-db.service mastodon-redis.service mastodon-es.service mastodon-net-external.service mastodon-setup.service
+After=mastodon-db.service mastodon-redis.service mastodon-es.service mastodon-net-external.service mastodon-setup.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/versions.env
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --health-cmd="wget -q --spider --proxy=off localhost:5050/health || exit 1" \
+                              --volume=/opt/mastodon/public:/mastodon/public/system \
+                              --env VIRTUAL_PATH="/" \
+                              --env VIRTUAL_PORT="5050" \
+                              --env-file="./mastodon.env" \
+                              --name=mastodon-sidekiq \
+                              --hostname=mastodon-sidekiq \
+                              ${MASTODON_IMAGE} \
+                              bundle exec sidekiq
+ExecStartPost=/opt/mastodon/wait-for-container.sh mastodon-sidekiq .State.Status running
+ExecStartPost=/usr/bin/docker network connect mastodon-net-external mastodon-sidekiq
+ExecStop=/usr/bin/docker stop mastodon-sidekiq

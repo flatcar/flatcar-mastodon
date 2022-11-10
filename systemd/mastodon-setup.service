@@ -1,0 +1,10 @@
+[Unit]
+Description=Mastodon first-time set-up and maintenance mode
+PartOf=mastodon.service
+Requires=mastodon-db.service mastodon-redis.service mastodon-es.service
+After=mastodon-db.service mastodon-redis.service mastodon-es.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/mastodon
+ExecStart=/opt/mastodon/setup-mastodon.sh

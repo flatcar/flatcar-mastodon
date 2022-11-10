@@ -1,0 +1,17 @@
+[Unit]
+Description=Mastodon umbrella service
+Requires=mastodon-sidekiq.service mastodon-web.service mastodon-streaming.service
+After=mastodon-sidekiq.service mastodon-web.service mastodon-streaming.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/true
+
+[Install]
+WantedBy=multi-user.target
+
+# If this unit fails, update-engine will not be started.
+# This will trigger an automatic roll-back should an
+#  update ever break this unit.
+RequiredBy=update-engine.service
