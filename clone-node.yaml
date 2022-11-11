@@ -1,0 +1,74 @@
+variant: flatcar
+version: 1.0.0
+
+passwd:
+  users:
+    - name: www
+      no_create_home: true
+      groups: [ docker ]
+    - name: mastodon
+      no_create_home: true
+      groups: [ docker ]
+    - name: backup
+
+storage:
+  directories:
+    # Restore scripts and secrets
+    - path: /opt/clone
+      mode: 0700
+    - path: /opt/clone/.ssh
+      mode: 0700
+    # Postgres directory is not in backup because db is backed up via SQL dump
+    - path: /opt/mastodon/postgres
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+
+  files:
+    - path: /etc/sysctl.d/99-vm-max-map-count.conf
+      mode: 0644
+      contents:
+        local: sysctl/99-vm-max-map-count.conf
+    # Restore scripts and secrets
+    - path: /opt/clone/.ssh/backup_key
+      mode: 0400
+      contents:
+        local: backup/backup_key
+    - path: /opt/clone/clone-node.sh
+      mode: 0500
+      contents:
+        local: backup/clone-node.sh
+    - path: /opt/clone/re_initialise.sh
+      mode: 0500
+      contents:
+        local: backup/re_initialise.sh
+    - path: /opt/clone/source_node
+      mode: 0400
+      contents:
+        # Replace BACKUPUSER@HOST with backup user name and host (domain or IP address)
+        #  of the source node.
+        inline: |
+          BACKUPUSER@HOST
+    - path: /etc/systemd/system/clone-node.service
+      mode: 0644
+      contents:
+        local: systemd/clone-node.service
+
+    # backup user sudo access and pubkey
+    - path: /etc/sudoers.d/backup
+      mode: 0440
+      contents:
+        local: backup/sudoers
+    - path: /home/backup/.ssh/authorized_keys
+      mode: 0444
+      contents:
+        local: backup/backup_key.pub
+      user:
+        name: backup
+
+systemd:
+  units:
+    - name: clone-node.service
+      enabled: true

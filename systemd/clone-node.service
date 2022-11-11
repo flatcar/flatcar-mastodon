@@ -1,0 +1,11 @@
+[Unit]
+Description=Clone a remote mastodon node
+Requires=network-online.target
+After=docker.socket network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/clone/clone-node.sh
+
+[Install]
+WantedBy=multi-user.target
