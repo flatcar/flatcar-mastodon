@@ -10,6 +10,9 @@ User=mastodon
 EnvironmentFile=/opt/mastodon/versions.env
 ExecStartPre=+/usr/bin/rm -f elasticsearch/nodes/*/node.lock
 ExecStartPre=+/usr/bin/chown -R 1000:1001 ./elasticsearch
+# Most parameters are taken from Mastodon upstream docker-compose: https://github.com/mastodon/mastodon/blob/main/docker-compose.yml#L26
+# ingest.geoip.downloader.enabled=false is from https://discuss.elastic.co/t/how-to-disable-geoip-usage-in-7-14-0/281076
+#  and disables downloading geoip data on start. ES container uses internal networking only, with no outside connectivity at all.
 ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
                               --health-cmd="curl --silent --fail localhost:9200/_cluster/health || exit 1" \
                               --volume=/opt/mastodon/elasticsearch:/usr/share/elasticsearch/data \
