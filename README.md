@@ -1,7 +1,7 @@
 # flatcar-mastodon
 Automation for deploying a Mastodon node on Flatcar.
 
-The files and config snippets in this repository allow to fully auto-provision a Mastodon node on Flatcar container linux.
+The files and config snippets in this repository allow to fully auto-provision a Mastodon node on Flatcar Container Linux.
 Set-up and configuration is automated via Ignition.
 Only instance-specific parameters need to be provided.
 
@@ -20,7 +20,7 @@ Prerequisites: a domain name for your new Mastodon instance, and access to your 
 1. Clone this repo.
 2. Edit [`caddy/Caddyfile`](caddy/Caddyfile) and set the domain name of your future instance, and the webmaster email address.
 3. Edit [`mastodon/admin.env`](mastodon/admin.env) and set the user name and email for Mastodon's initial Administrator account.
-   **DO NOT USE 'admin'**. This is a reserved name (Mastodon internally), using 'admin' will cause the initial set-up to fail.
+   **DO NOT USE 'admin'**. This is a reserved name (Mastodon internal), using 'admin' will cause the initial set-up to fail.
 4. Edit [`mastodon/mastodon.env.template`](mastodon/mastodon.env.template) and set your future instance's domain (same as for Caddy above)
    as well as an SMTP account for the instance to send notification emails to all users from.
    Make sure the SMTP configuration is correct as this is the only way of using the initial admin account without manually logging
@@ -57,7 +57,7 @@ All services start automatically at boot.
 All mastodon services are grouped in an umbrella service and can be started with `systemctl start mastodon` and torn down with `systemctl stop mastodon` respectively.
 
 
-Services dependent on other services are displayed towards the root; services w/o dependencies are leafs.
+Services dependent on other services are displayed towards the root; services w/o dependencies are leaves.
 
 ```
 mastodon.service                              - Umbrella service that depends on all services.

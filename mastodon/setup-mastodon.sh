@@ -23,7 +23,7 @@ secret="$(docker run -i --network mastodon-net-internal --rm -e RUBYOPT=-W0 \
 echo "SECRET_KEY_BASE=${secret}" >> "${temp_cfg}"
 
 secret="$(docker run -i --network mastodon-net-internal --rm -e RUBYOPT=-W0 \
-            tootsuite/mastodon:v3.5.3 bundle exec rake secret)"
+            "${MASTODON_IMAGE}" bundle exec rake secret)"
 echo "OTP_SECRET=${secret}" >> "${temp_cfg}"
 docker run -i --network mastodon-net-internal --rm -e RUBYOPT=-W0 \
             ${MASTODON_IMAGE} bundle exec rake mastodon:webpush:generate_vapid_key \
