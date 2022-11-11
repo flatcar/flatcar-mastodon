@@ -14,6 +14,7 @@ source ./admin.env
 echo "Starting first-time set-up."
 
 temp_cfg=$(mktemp)
+chmod 600 "${temp_cfg}"
 cat ./mastodon.env.template >> "${temp_cfg}"
 
 echo "Generating keys and secrets."
@@ -29,10 +30,9 @@ docker run -i --network mastodon-net-internal --rm -e RUBYOPT=-W0 \
             ${MASTODON_IMAGE} bundle exec rake mastodon:webpush:generate_vapid_key \
     >> "${temp_cfg}"
 
-chmod 444 "${temp_cfg}"
 
 echo "Initialising the database."
-docker run -i --network mastodon-net-internal --rm -v "${temp_cfg}":/opt/mastodon/.env.production \
+docker run -i --network mastodon-net-internal --rm --env-file "${temp_cfg}" \
         -e RUBYOPT=-W0 -e DISABLE_DATABASE_ENVIRONMENT_CHECK=1 ${MASTODON_IMAGE} \
         bundle exec rake db:setup
 
@@ -42,7 +42,7 @@ out="$(mktemp)"
 # Setting the hostname to the domain of the admin user's email works around a tootctl DNS check issue.
 # See https://github.com/mastodon/mastodon/issues/15850 for details.
 admin_email_domain="$(echo "${ADMIN_EMAIL}" | sed 's/.*@//')"
-docker run -i --network mastodon-net-internal --rm -v "${temp_cfg}":/opt/mastodon/.env.production \
+docker run -i --network mastodon-net-internal --rm --env-file "${temp_cfg}" \
         -e RUBYOPT=-W0 -e RAILS_ENV=production --hostname "${admin_email_domain}" ${MASTODON_IMAGE} \
         bundle exec bin/tootctl accounts create "${ADMIN_USER}" --email "${ADMIN_EMAIL}" --confirmed --role admin \
         >> "${out}"
@@ -56,19 +56,20 @@ fi
 
 rm "${out}"
 echo "ADMIN_PASSWORD='${pass}'" >>admin.env
+chmod 400 admin.env
 
 echo "Precompiling assets."
-docker run -i --network mastodon-net-internal --rm -v "${temp_cfg}":/opt/mastodon/.env.production \
+docker run -i --network mastodon-net-internal --rm --env-file "${temp_cfg}" \
         -e RUBYOPT=-W0 -e RAILS_ENV=production ${MASTODON_IMAGE} \
         bundle exec rails assets:precompile
 
 echo "Building initial feed."
-docker run -i --network mastodon-net-internal --rm -v "${temp_cfg}":/opt/mastodon/.env.production \
+docker run -i --network mastodon-net-internal --rm --env-file "${temp_cfg}" \
         -e RUBYOPT=-W0 -e RAILS_ENV=production ${MASTODON_IMAGE} \
        bundle exec bin/tootctl feeds build
 
+chown mastodon:mastodon "${temp_cfg}"
+chmod 400 "${temp_cfg}"
 mv "${temp_cfg}" mastodon.env
-chmod 440 mastodon.env
-chown mastodon:mastodon mastodon.env
 
-echo "All Done!"                                                                                   
+echo "All Done!"

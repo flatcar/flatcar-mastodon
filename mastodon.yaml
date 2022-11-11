@@ -83,7 +83,7 @@ storage:
         local: caddy/Caddyfile
 
     - path: /opt/mastodon/admin.env
-      mode: 0640
+      mode: 0600
       contents:
         local: mastodon/admin.env
     - path: /opt/mastodon/mastodon.env.template
