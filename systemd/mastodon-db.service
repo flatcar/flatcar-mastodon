@@ -1,0 +1,22 @@
+[Unit]
+Description=Postgres DB for Mastodon
+PartOf=mastodon.service
+Requires=mastodon-net-internal.service
+After=mastodon-net-internal.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/versions.env
+ExecStartPre=/usr/bin/touch /opt/mastodon/mastodon_db_backup.sql
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --shm-size=256mb \
+                              --health-cmd="pg_isready -U postgres" \
+                              --env POSTGRES_HOST_AUTH_METHOD=trust \
+                              --volume=/opt/mastodon/postgres:/var/lib/postgresql/data \
+                              --volume=/opt/mastodon/mastodon_db_backup.sql:/docker-entrypoint-initdb.d/mastodon_db.sql \
+                              --name=mastodon-db \
+                              --hostname=mastodon-db \
+                              ${POSTGRES_IMAGE}
+ExecStartPost=/opt/mastodon/wait-for-container.sh mastodon-db .State.Health healthy
+ExecStop=/usr/bin/docker stop mastodon-db

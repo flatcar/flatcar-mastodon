@@ -1,0 +1,175 @@
+passwd:
+  users:
+    - name: www
+      no_create_home: true
+      groups: [ docker ]
+    - name: mastodon
+      no_create_home: true
+      groups: [ docker ]
+
+storage:
+  directories:
+    - path: /opt/caddy
+      mode: 0755
+      user:
+        name: www
+      group:
+        name: www
+    - path: /opt/caddy/data
+      mode: 0755
+      user:
+        name: www
+      group:
+        name: www
+    - path: /opt/caddy/logs
+      mode: 0755
+      user:
+        name: www
+      group:
+        name: www
+    - path: /opt/caddy/etc
+      mode: 0755
+      user:
+        name: www
+      group:
+        name: www
+    - path: /opt/caddy/config
+      mode: 0755
+      user:
+        name: www
+      group:
+        name: www
+
+    - path: /opt/mastodon
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/elasticsearch
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/postgres
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/redis
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/public
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+
+  files:
+    - path: /etc/sysctl.d/99-vm-max-map-count.conf
+      mode: 0644
+      contents:
+        local: sysctl/99-vm-max-map-count.conf
+
+    - path: /opt/caddy/etc/Caddyfile
+      mode: 0644
+      contents:
+        local: caddy/Caddyfile
+
+    - path: /opt/mastodon/admin.env
+      mode: 0600
+      contents:
+        local: mastodon/admin.env
+    - path: /opt/mastodon/mastodon.env.template
+      mode: 0644
+      contents:
+        local: mastodon/mastodon.env.template
+    - path: /opt/mastodon/setup-mastodon.sh
+      mode: 0755
+      contents:
+        local: mastodon/setup-mastodon.sh
+    - path: /opt/mastodon/versions.env
+      mode: 0755
+      contents:
+        local: mastodon/versions.env
+
+    - path: /opt/mastodon/wait-for-container.sh
+      mode: 0755
+      contents:
+        local: mastodon/wait-for-container.sh
+
+    - path: /etc/systemd/system/mastodon-net-external.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-net-external.service
+    - path: /etc/systemd/system/mastodon-net-internal.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-net-internal.service
+    - path: /etc/systemd/system/caddy.service
+      mode: 0644
+      contents:
+        local: systemd/caddy.service
+    - path: /etc/systemd/system/mastodon-db.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-db.service
+    - path: /etc/systemd/system/mastodon-es.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-es.service
+    - path: /etc/systemd/system/mastodon-redis.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-redis.service
+    - path: /etc/systemd/system/mastodon-setup.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-setup.service
+    - path: /etc/systemd/system/mastodon-sidekiq.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-sidekiq.service
+    - path: /etc/systemd/system/mastodon-streaming.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-streaming.service
+    - path: /etc/systemd/system/mastodon-web.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon-web.service
+    - path: /etc/systemd/system/mastodon.service
+      mode: 0644
+      contents:
+        local: systemd/mastodon.service
+
+systemd:
+  units:
+    - name: mastodon-net-external.service
+      enabled: true
+    - name: mastodon-net-internal.service
+      enabled: true
+    - name: caddy.service
+      enabled: true
+    - name: mastodon-db.service
+      enabled: true
+    - name: mastodon-es.service
+      enabled: true
+    - name: mastodon-redis.service
+      enabled: true
+    - name: mastodon-setup.service
+      enabled: true
+    - name: mastodon-sidekiq.service
+      enabled: true
+    - name: mastodon-streaming.service
+      enabled: true
+    - name: mastodon-web.service
+      enabled: true
+    - name: mastodon.service
+      enabled: true

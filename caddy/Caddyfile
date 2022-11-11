@@ -1,0 +1,47 @@
+{
+        email __REPLACE_ME_WITH_WEBMASTER_EMAIL__
+}
+
+__REPLACE_ME_WITH_DOMAIN__ {
+        log {
+                output file /logs/access.log
+        }
+
+        root * /srv/mastodon/public
+
+        encode gzip
+
+        @static file
+
+        handle @static {
+                file_server
+        }
+
+        handle /api/v1/streaming* {
+                reverse_proxy mastodon-streaming:5051 {
+                        header_up X-Forwarded-Proto https
+                }
+        }
+
+        handle {
+                reverse_proxy mastodon-web:5050 {
+                        header_up X-Forwarded-Proto https
+                }
+        }
+
+        header {
+                Strict-Transport-Security "max-age=31536000;"
+        }
+
+        header /sw.js  Cache-Control "public, max-age=0";
+        header /emoji* Cache-Control "public, max-age=31536000, immutable"
+        header /packs* Cache-Control "public, max-age=31536000, immutable"
+        header /system/accounts/avatars* Cache-Control "public, max-age=31536000, immutable"
+        header /system/media_attachments/files* Cache-Control "public, max-age=31536000, immutable"
+
+        handle_errors {
+                @5xx expression `{http.error.status_code} >= 500 && {http.error.status_code} < 600`
+                rewrite @5xx /500.html
+                file_server
+        }
+}

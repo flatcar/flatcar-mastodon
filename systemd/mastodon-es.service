@@ -1,0 +1,36 @@
+[Unit]
+Description=Elasticsearch for Mastodon
+PartOf=mastodon.service
+Requires=mastodon-net-internal.service
+After=mastodon-net-internal.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/versions.env
+ExecStartPre=+/usr/bin/rm -f elasticsearch/nodes/*/node.lock
+ExecStartPre=+/usr/bin/chown -R 1000:1001 ./elasticsearch
+# Most parameters are taken from Mastodon upstream docker-compose: https://github.com/mastodon/mastodon/blob/main/docker-compose.yml#L26
+# ingest.geoip.downloader.enabled=false is from https://discuss.elastic.co/t/how-to-disable-geoip-usage-in-7-14-0/281076
+#  and disables downloading geoip data on start. ES container uses internal networking only, with no outside connectivity at all.
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --health-cmd="curl --silent --fail localhost:9200/_cluster/health || exit 1" \
+                              --volume=/opt/mastodon/elasticsearch:/usr/share/elasticsearch/data \
+                              --env ES_JAVA_OPTS="-Xms512m -Xmx512m -Des.enforce.bootstrap.checks=true" \
+                              --env bootstrap.memory_lock=true \
+                              --env xpack.license.self_generated.type=basic \
+                              --env xpack.security.enabled=false \
+                              --env xpack.watcher.enabled=false \
+                              --env xpack.graph.enabled=false \
+                              --env xpack.ml.enabled=false \
+                              --env ingest.geoip.downloader.enabled=false \
+                              --env cluster.name=es-mastodon \
+                              --env discovery.type=single-node \
+                              --env thread_pool.write.queue_size=1000 \
+                              --ulimit memlock=-1:-1 \
+                              --ulimit nofile=65536:65536 \
+                              --name=mastodon-es \
+                              --hostname=mastodon-es \
+                              ${ES_IMAGE}
+ExecStartPost=/opt/mastodon/wait-for-container.sh mastodon-es .State.Health healthy
+ExecStop=/usr/bin/docker stop mastodon-es
