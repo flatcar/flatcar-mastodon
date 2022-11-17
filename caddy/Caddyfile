@@ -1,5 +1,11 @@
 {
         email __REPLACE_ME_WITH_WEBMASTER_EMAIL__
+
+       admin 0.0.0.0:2019
+       servers {           
+               metrics     
+       }                   
+
 }
 
 __REPLACE_ME_WITH_DOMAIN__ {
@@ -15,6 +21,15 @@ __REPLACE_ME_WITH_DOMAIN__ {
 
         handle @static {
                 file_server
+        }
+
+        handle /monitoring/* {
+                uri strip_prefix /monitoring
+                reverse_proxy monitoring-grafana:3000 {
+                        header_up Host {host}
+                        header_up X-Forwarded-Proto https
+                        header_up X-Real-IP {remote_host}
+                }
         }
 
         handle /api/v1/streaming* {

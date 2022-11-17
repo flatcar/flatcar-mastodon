@@ -1,0 +1,22 @@
+[Unit]
+Description=CAdvisor prometheus metrics exporter
+
+[Service]
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+ExecStart=/usr/bin/docker run --rm --privileged \
+                    --name metrics-provider-cadvisor \
+                    --device /dev/kmsg:/dev/kmsg \
+                    --volume /:/rootfs:ro \
+                    --volume /var/run:/var/run:ro \
+                    --volume /sys:/sys:ro \
+                    --volume /var/lib/docker:/var/lib/docker:ro \
+                    --volume /cgroup:/cgroup:ro \
+                    --label "org.label-schema.group=monitoring" \
+                    --net host \
+                    --add-host host.docker.internal:host-gateway \
+                    ${CADVISOR_IMAGE} \
+                        --listen_ip=host.docker.internal --port=9101
+ExecStop=/usr/bin/docker stop metrics-provider-cadvisor
+
+[Install]
+WantedBy=multi-user.target

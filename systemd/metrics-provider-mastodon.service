@@ -1,0 +1,23 @@
+[Unit]
+Description=Mastodon prometheus metrics exporter
+Requires=mastodon-web.service 
+After=mastodon-web.service 
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+EnvironmentFile=/opt/mastodon/mastodon.env
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --name=metrics-provider-mastodon \
+                              --label "org.label-schema.group=monitoring" \
+                              ${MASTODON_EXPORTER_IMAGE} \
+                                  -mastodon-url=https://${LOCAL_DOMAIN} \
+                                  -web.listen-address :9102
+ExecStartPost=/opt/mastodon/wait-for-container.sh metrics-provider-mastodon .State.Status running
+ExecStartPost=/usr/bin/docker network connect mastodon-net-external metrics-provider-mastodon
+
+ExecStop=/usr/bin/docker stop metrics-provider-mastodon
+
+[Install]
+WantedBy=multi-user.target

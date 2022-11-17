@@ -1,3 +1,6 @@
+variant: flatcar
+version: 1.0.0
+
 passwd:
   users:
     - name: www
@@ -9,6 +12,7 @@ passwd:
 
 storage:
   directories:
+    # Caddy
     - path: /opt/caddy
       mode: 0755
       user:
@@ -40,6 +44,7 @@ storage:
       group:
         name: www
 
+    # Mastodon
     - path: /opt/mastodon
       mode: 0755
       user:
@@ -71,6 +76,50 @@ storage:
       group:
         name: mastodon
 
+    # Monitoring
+    - path: /opt/mastodon/grafana
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/grafana/data
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/grafana/dashboards
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/grafana/datasources
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/prometheus
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/prometheus/etc
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+    - path: /opt/mastodon/prometheus/data
+      mode: 0755
+      user:
+        name: mastodon
+      group:
+        name: mastodon
+
   files:
     - path: /etc/sysctl.d/99-vm-max-map-count.conf
       mode: 0644
@@ -82,6 +131,7 @@ storage:
       contents:
         local: caddy/Caddyfile
 
+    # Mastodon
     - path: /opt/mastodon/admin.env
       mode: 0600
       contents:
@@ -149,6 +199,107 @@ storage:
       contents:
         local: systemd/mastodon.service
 
+    # Monitoring
+    - path: /opt/mastodon/monitoring-admin.env
+      mode: 0400
+      user:
+        name: mastodon
+      contents:
+        local: monitoring/monitoring-admin.env
+    - path: /opt/mastodon/monitoring-versions.env
+      mode: 0644
+      contents:
+        local: monitoring/monitoring-versions.env
+    - path: /opt/mastodon/postgres-monitoring-queries.yaml
+      mode: 0644
+      contents:
+        local: monitoring/postgres-monitoring-queries.yaml
+    - path: /opt/mastodon/prometheus/etc/prometheus.yaml
+      mode: 0644
+      contents:
+        local: monitoring/prometheus.yaml
+    - path: /opt/mastodon/grafana/datasources/grafana-datasources.yaml
+      mode: 0644
+      contents:
+        local: monitoring/grafana-datasources.yaml
+    - path: /opt/mastodon/grafana/dashboards/grafana-dashboards.yaml
+      mode: 0644
+      contents:
+        local: monitoring/grafana-dashboards.yaml
+    - path: /opt/mastodon/grafana/dashboards/docker-containers.json
+      mode: 0644
+      contents:
+        local: monitoring/docker-containers.json
+    - path: /opt/mastodon/grafana/dashboards/elasticsearch.json
+      mode: 0644
+      contents:
+        local: monitoring/elasticsearch.json
+    - path: /opt/mastodon/grafana/dashboards/host-system.json
+      mode: 0644
+      contents:
+        local: monitoring/host-system.json
+    - path: /opt/mastodon/grafana/dashboards/mastodon.json
+      mode: 0644
+      contents:
+        local: monitoring/mastodon.json
+    - path: /opt/mastodon/grafana/dashboards/monitoring.json
+      mode: 0644
+      contents:
+        local: monitoring/monitoring.json
+    - path: /opt/mastodon/grafana/dashboards/postgres.json
+      mode: 0644
+      contents:
+        local: monitoring/postgres.json
+    - path: /opt/mastodon/grafana/dashboards/redis.json
+      mode: 0644
+      contents:
+        local: monitoring/redis.json
+    - path: /opt/mastodon/grafana/dashboards/sidekiq.json
+      mode: 0644
+      contents:
+        local: monitoring/sidekiq.json
+    - path: /opt/mastodon/grafana/dashboards/caddy.json
+      mode: 0644
+      contents:
+        local: monitoring/caddy.json
+
+    - path: /etc/systemd/system/metrics-provider-cadvisor.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-cadvisor.service
+    - path: /etc/systemd/system/metrics-provider-es.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-es.service
+    - path: /etc/systemd/system/metrics-provider-mastodon.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-mastodon.service
+    - path: /etc/systemd/system/metrics-provider-nodeexporter.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-nodeexporter.service
+    - path: /etc/systemd/system/metrics-provider-postgres.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-postgres.service
+    - path: /etc/systemd/system/metrics-provider-redis.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-redis.service
+    - path: /etc/systemd/system/metrics-provider-sidekiq.service
+      mode: 0644
+      contents:
+        local: systemd/metrics-provider-sidekiq.service
+    - path: /etc/systemd/system/monitoring-grafana.service
+      mode: 0644
+      contents:
+        local: systemd/monitoring-grafana.service
+    - path: /etc/systemd/system/monitoring-prometheus.service
+      mode: 0644
+      contents:
+        local: systemd/monitoring-prometheus.service
+
 systemd:
   units:
     - name: mastodon-net-external.service
@@ -172,4 +323,23 @@ systemd:
     - name: mastodon-web.service
       enabled: true
     - name: mastodon.service
+      enabled: true
+
+    - name: metrics-provider-cadvisor.service
+      enabled: true
+    - name: metrics-provider-es.service
+      enabled: true
+    - name: metrics-provider-mastodon.service
+      enabled: true
+    - name: metrics-provider-nodeexporter.service
+      enabled: true
+    - name: metrics-provider-postgres.service
+      enabled: true
+    - name: metrics-provider-redis.service
+      enabled: true
+    - name: metrics-provider-sidekiq.service
+      enabled: true
+    - name: monitoring-grafana.service
+      enabled: true
+    - name: monitoring-prometheus.service
       enabled: true

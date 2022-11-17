@@ -1,0 +1,32 @@
+[Unit]
+Description=Grafana monitoring dashboards service
+# On first boot, mastodon-setup will need some time to create mastodon.env used below.
+Requires=mastodon-net-internal.service mastodon-net-external.service mastodon-setup.service
+After=mastodon-net-internal.service mastodon-net-external.service mastodon-setup.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+EnvironmentFile=/opt/mastodon/monitoring-admin.env
+# for LOCAL_DOMAIN
+EnvironmentFile=/opt/mastodon/mastodon.env
+ExecStartPre=+/usr/bin/chown -R 472 ./grafana
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --volume=/opt/mastodon/grafana/data:/var/lib/grafana \
+                              --volume=/opt/mastodon/grafana/dashboards:/etc/grafana/provisioning/dashboards \
+                              --volume=/opt/mastodon/grafana/datasources:/etc/grafana/provisioning/datasources \
+                              --name=monitoring-grafana \
+                              --label "org.label-schema.group=monitoring" \
+                              --env-file /opt/mastodon/monitoring-admin.env \
+                              --env GF_SERVER_DOMAIN="${LOCAL_DOMAIN}" \
+                              --env GF_SERVER_ROOT_URL="https://%(domain)s/monitoring/" \
+                              --env GF_SERVER_SERVE_FROM_SUBPATH="true" \
+                              ${GRAFANA_IMAGE}
+ExecStartPost=/opt/mastodon/wait-for-container.sh monitoring-grafana .State.Status running
+ExecStartPost=/usr/bin/docker network connect mastodon-net-external monitoring-grafana
+
+ExecStop=/usr/bin/docker stop monitoring-grafana
+
+[Install]
+WantedBy=multi-user.target

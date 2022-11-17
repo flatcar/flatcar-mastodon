@@ -1,0 +1,24 @@
+[Unit]
+Description=NodeExporter prometheus metrics exporter
+
+[Service]
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+ExecStart=/usr/bin/docker run --rm \
+                    --name metrics-provider-nodeexporter \
+                    --volume /:/rootfs:ro \
+                    --volume /sys:/host/sys:ro \
+                    --volume /proc:/host/proc:ro \
+                    --label "org.label-schema.group=monitoring" \
+                    --net host \
+                    --add-host host.docker.internal:host-gateway \
+                    ${NODEEXPORTER_IMAGE} \
+                        --path.procfs=/host/proc \
+                        --path.rootfs=/rootfs \
+                        --path.sysfs=/host/sys \
+                        --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/) \
+                        --web.listen-address=host.docker.internal:9100
+
+ExecStop=/usr/bin/docker stop metrics-provider-cadvisor
+
+[Install]
+WantedBy=multi-user.target
