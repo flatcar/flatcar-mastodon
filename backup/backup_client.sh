@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [ "${1:-}" = "backup-db" ] ; then
-    PGPASSWORD=${DB_PASS} pg_dump -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER}
+    PGPASSWORD="${DB_PASS}" pg_dump -h "${DB_HOST}" -p "${DB_PORT}" -U "${DB_USER}"
     exit
 fi
 

@@ -11,13 +11,13 @@
 set -euo pipefail
 backup_basedir="/opt/backup"
 
-remote=""
+remote=()
 
 if [ "$#" -gt 0 ] ; then
-    if [ -n "${1:-}" -a -f "${2:-}" ] ; then
-        remote="ssh -i ${2} ${1}"
+    if [ -n "${1:-}" -a -s "${2:-}" ] ; then
+        remote=( ssh -i "${2}" "${1}" )
         echo "Backing up from remote via '${remote}'"
-        remote="$remote sudo"
+        remote+=( sudo )
     else
         echo "Error parsing command line arguments."
         echo "Usage: $0 <remote_user@source-host> <private_ssh_key>"
@@ -26,10 +26,10 @@ else
     echo "Backing up from local host"
 fi
 
-ts="$(date --rfc-3339=seconds | sed -e 's/[ :]/_/g' -e's/+.*//')"
+ts="$(date --rfc-3339=seconds | sed -e 's/[ :]/_/g' -e 's/+.*//')"
 fname="mastodon-backup-${ts}.tgz"
 
 echo "Pulling backup '${fname}'."
-$remote "${backup_basedir}"/backup_client.sh > "${fname}"
+"${remote[@]}" "${backup_basedir}"/backup_client.sh > "${fname}"
 
 echo "Done"
