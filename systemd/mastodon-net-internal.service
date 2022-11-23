@@ -9,7 +9,7 @@ Type=oneshot
 RemainAfterExit=yes
 User=mastodon
 # Remove stale network from unclean shut-down.
-# It's OK if this fails (nothing to clean up), and we don't want the failrure recorded.
+# It's OK if this fails (nothing to clean up), and we don't want the failure recorded.
 ExecStartPre=-/usr/bin/sh -c "/usr/bin/docker network rm mastodon-net-internal || true"
 ExecStart=/usr/bin/docker network create --internal --subnet 10.0.0.0/24 mastodon-net-internal
 ExecStop=/usr/bin/docker network rm mastodon-net-internal
