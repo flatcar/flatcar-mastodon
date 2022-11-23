@@ -1,0 +1,22 @@
+[Unit]
+Description=Redis prometheus metrics exporter
+# On first boot, mastodon-setup will need some time to create mastodon.env used below.
+Requires=mastodon-redis.service mastodon-setup.service
+After=mastodon-redis.service mastodon-setup.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+# To construct command line options
+EnvironmentFile=/opt/mastodon/mastodon.env
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --name=metrics-provider-redis \
+                              --label "org.label-schema.group=monitoring" \
+                              ${REDIS_EXPORTER_IMAGE} \
+                              --redis.addr "${REDIS_HOST}:${REDIS_PORT}" --redis.password "${REDIS_PASSWORD}"
+
+ExecStop=/usr/bin/docker stop metrics-provider-redis
+
+[Install]
+WantedBy=multi-user.target

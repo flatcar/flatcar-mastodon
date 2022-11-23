@@ -1,0 +1,30 @@
+[Unit]
+Description=Prometheus metrics scraper and time series db
+Requires=mastodon-net-internal.service mastodon-net-external.service
+After=mastodon-net-internal.service mastodon-net-external.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+ExecStartPre=+/usr/bin/chown -R 65534 ./prometheus
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --volume=/opt/mastodon/prometheus/etc:/etc/prometheus \
+                              --volume=/opt/mastodon/prometheus/data:/prometheus \
+                              --name=monitoring-prometheus \
+                              --label "org.label-schema.group=monitoring" \
+                              --add-host host.docker.internal:host-gateway \
+                              ${PROMETHEUS_IMAGE} \
+                                    --config.file=/etc/prometheus/prometheus.yaml \
+                                    --storage.tsdb.path=/prometheus \
+                                    --web.console.libraries=/etc/prometheus/console_libraries \
+                                    --web.console.templates=/etc/prometheus/consoles \
+                                    --storage.tsdb.retention.time=200h \
+                                    --web.enable-lifecycle
+ExecStartPost=/opt/mastodon/wait-for-container.sh monitoring-prometheus .State.Status running
+ExecStartPost=/usr/bin/docker network connect mastodon-net-external monitoring-prometheus
+
+ExecStop=/usr/bin/docker stop monitoring-prometheus
+
+[Install]
+WantedBy=multi-user.target

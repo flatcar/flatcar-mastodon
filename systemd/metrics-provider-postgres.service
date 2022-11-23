@@ -1,0 +1,24 @@
+[Unit]
+Description=PostgreSQL prometheus metrics exporter
+# On first boot, mastodon-setup will need some time to create mastodon.env used below.
+Requires=mastodon-db.service mastodon-setup.service
+After=mastodon-db.service mastodon-setup.service
+
+[Service]
+WorkingDirectory=/opt/mastodon
+User=mastodon
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+# To construct DATA_SOURCE_NAME
+EnvironmentFile=/opt/mastodon/mastodon.env
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --name=metrics-provider-postgres \
+                              --volume=/opt/mastodon/postgres-monitoring-queries.yaml:/postgres-monitoring-queries.yaml \
+                              --label "org.label-schema.group=monitoring" \
+                              --env DATA_SOURCE_NAME="postgresql://${DB_USER}:${DB_PASS}@mastodon-db:${DB_PORT}/postgres?sslmode=disable" \
+                              --env PG_EXPORTER_EXTEND_QUERY_PATH=/postgres-monitoring-queries.yaml \
+                              prometheuscommunity/postgres-exporter:v0.11.1
+
+ExecStop=/usr/bin/docker stop metrics-provider-postgres
+
+[Install]
+WantedBy=multi-user.target

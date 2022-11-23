@@ -8,5 +8,8 @@ After=docker.socket
 Type=oneshot
 RemainAfterExit=yes
 User=mastodon
+# Remove stale network from unclean shut-down.
+# It's OK if this fails (nothing to clean up), and we don't want the failure recorded.
+ExecStartPre=-/usr/bin/sh -c "/usr/bin/docker network rm mastodon-net-external || true"
 ExecStart=/usr/bin/docker network create --subnet 192.168.1.0/24 mastodon-net-external
 ExecStop=/usr/bin/docker network rm mastodon-net-external

@@ -1,0 +1,50 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:9101']
+
+  - job_name: 'mastodon_es'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['metrics-provider-es:9114']
+
+  - job_name: 'mastodon_metrics'
+    scrape_interval: 10s
+    honor_labels: true
+    static_configs:
+      - targets: ['metrics-provider-mastodon:9102']
+
+  - job_name: 'nodeexporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+
+  - job_name: 'mastodon_postgres'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['metrics-provider-postgres:9187']
+
+  - job_name: 'mastodon_redis'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['metrics-provider-redis:9121']
+
+  - job_name: 'mastodon_sidekiq'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['metrics-provider-sidekiq:9292']
+
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'caddy'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['caddy-webserver:2019']

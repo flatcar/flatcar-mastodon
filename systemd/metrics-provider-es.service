@@ -1,0 +1,19 @@
+[Unit]
+Description=Elasticsearch prometheus metrics exporter
+Requires=mastodon-es.service 
+After=mastodon-es.service 
+
+[Service]
+EnvironmentFile=/opt/mastodon/monitoring-versions.env
+WorkingDirectory=/opt/mastodon
+User=mastodon
+ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
+                              --label "org.label-schema.group=monitoring" \
+                              --name=metrics-provider-es \
+                              ${ES_EXPORTER_IMAGE} \
+                              --es.uri=http://mastodon-es:9200
+
+ExecStop=/usr/bin/docker stop metrics-provider-es
+
+[Install]
+WantedBy=multi-user.target

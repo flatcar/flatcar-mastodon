@@ -15,7 +15,7 @@ ExecStart=/usr/bin/docker run --rm --network=mastodon-net-internal \
                               --env VIRTUAL_PORT="5050" \
                               --env-file="./mastodon.env" \
                               --name=mastodon-web \
-                              --hostname=mastodon-web \
+                              --env ALTERNATE_DOMAINS=mastodon-web \
                               -p 127.0.0.1:5050:5050 \
                               ${MASTODON_IMAGE} \
                               bundle exec rails s -p 5050
