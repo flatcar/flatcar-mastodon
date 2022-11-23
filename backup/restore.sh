@@ -65,9 +65,6 @@ rm -f /etc/systemd/system/mastodon* /etc/systemd/system/metrics-provider-* /etc/
 echo "Removing mastodon, web server, and metrics data."
 rm -rf /opt/mastodon/ /opt/caddy/ /opt/backup/ 
 
-echo "Press return"
-read junk
-
 echo "Restoring backup from '${backup_file}'" 
 cat "${backup_file}"  | docker run --rm -i ghcr.io/flatcar/pigz:latest -d -c - \
                       | tar x --directory /

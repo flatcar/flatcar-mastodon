@@ -10,13 +10,13 @@ chmod 0444 /opt/backup/mastodon_db_backup.sql
 echo "Importing mastodon database"
 # We run this in the background instead of using --detach so the log output remains visible
 /usr/bin/docker run --rm  \
-					  --shm-size=256mb \
-					  --health-cmd="pg_isready -U postgres" \
-					  --env POSTGRES_HOST_AUTH_METHOD=trust \
-					  --volume=/opt/backup/mastodon_db_backup.sql:/docker-entrypoint-initdb.d/mastodon_db.sql \
-					  --volume=/opt/mastodon/postgres:/var/lib/postgresql/data \
-					  --name=mastodon-db-import \
-					  "${POSTGRES_IMAGE}" &
+                  --shm-size=256mb \
+                  --health-cmd="pg_isready -U postgres" \
+                  --env POSTGRES_HOST_AUTH_METHOD=trust \
+                  --volume=/opt/backup/mastodon_db_backup.sql:/docker-entrypoint-initdb.d/mastodon_db.sql \
+                  --volume=/opt/mastodon/postgres:/var/lib/postgresql/data \
+                  --name=mastodon-db-import \
+                  "${POSTGRES_IMAGE}" &
 
 # 20 minutes max for db import
 /opt/mastodon/wait-for-container.sh mastodon-db-import .State.Health healthy 1200
