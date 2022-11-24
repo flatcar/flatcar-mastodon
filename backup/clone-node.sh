@@ -30,6 +30,7 @@ echo "Fetching backup."
 echo "Re-initialising system"
 "${clone_basedir}/re_initialise.sh"
 
+# Remove backup private SSH keyfile. Not necessary any more.
 rm -rf "${clone_basedir}/.ssh"
 
 echo "Disabling clone-node service"
