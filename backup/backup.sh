@@ -16,7 +16,7 @@ remote=()
 if [ "$#" -gt 0 ] ; then
     if [ -n "${1:-}" -a -s "${2:-}" ] ; then
         remote=( ssh -i "${2}" "${1}" )
-        echo "Backing up from remote via '${remote}'"
+        echo "Backing up from remote via '${remote[*]}'"
         remote+=( sudo )
     else
         echo "Error parsing command line arguments."

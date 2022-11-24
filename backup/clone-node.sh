@@ -15,10 +15,15 @@ fi
 
 remote_address="$(cat "$clone_basedir/source_node")"
 
-remote="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${clone_basedir}/.ssh/backup_key ${remote_address} sudo"
+remote=("ssh"
+        "-o UserKnownHostsFile=/dev/null"
+        "-o StrictHostKeyChecking=no"
+        "-i ${clone_basedir}/.ssh/backup_key"
+        "${remote_address}"
+        "sudo")
 
 echo "Fetching backup."
-$remote "${remote_backup_basedir}"/backup_client.sh \
+"${remote[@]}" "${remote_backup_basedir}"/backup_client.sh \
         | docker run --rm -i ghcr.io/flatcar/pigz:latest -d -c - \
         | tar x --directory /
 
