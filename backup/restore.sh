@@ -38,6 +38,8 @@ if [ "$(realpath "$0")" = "$this_script" ] ; then
     exec "${tmp_restore_script}" "${@}"
 fi
 
+trap "rm -f '${0}'" EXIT
+
 if [ ! -f "${reinit_script}" ] ; then
     echo "INTERNAL ERROR: re-init script not present."
     exit 2
@@ -46,6 +48,8 @@ fi
 tmp_reinit_script="$(mktemp)"
 chmod 700 "${tmp_reinit_script}"
 cat "${reinit_script}" >> "${tmp_reinit_script}"
+
+trap "rm -f '${0}' ${tmp_reinit_script}'" EXIT
 
 echo "Stopping and disabling all mastodon, monitoring. and web services, and wiping service files."
 

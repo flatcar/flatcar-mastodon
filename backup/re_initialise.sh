@@ -30,12 +30,16 @@ rm /opt/backup/mastodon_db_backup.sql
 echo "Enabling mastodon and monitoring service units"
 systemctl daemon-reload
 
-# This will be noisy as some of the units come w/o an [Install] section
-# (these are pulled in by other units). Warnings are safe to ignore.
 for f in /etc/systemd/system/mastodon* \
          /etc/systemd/system/metrics-provider* \
          /etc/systemd/system/monitoring* \
          caddy; do
+
+         if ! grep -q '\[Install\]' "${f}"; then
+            # Some services are pulled in by other services and do not need installation.
+            continue
+         fi
+
          u="$(basename "$f")"
          systemctl enable "$u"
 done
