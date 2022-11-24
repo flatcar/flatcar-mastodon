@@ -58,7 +58,7 @@ systemctl stop "mastodon*" "metrics-provider-*" "monitoring*" "caddy*"
 for f in /etc/systemd/system/mastodon* \
          /etc/systemd/system/metrics-provider* \
          /etc/systemd/system/monitoring* \
-         caddy; do
+         /etc/systemd/system/caddy* ; do
          u="$(basename "$f")"
          # Sadly, "disable" does not support globbing like "start" and "stop" do
          systemctl disable "$u"

@@ -33,7 +33,7 @@ systemctl daemon-reload
 for f in /etc/systemd/system/mastodon* \
          /etc/systemd/system/metrics-provider* \
          /etc/systemd/system/monitoring* \
-         caddy; do
+         /etc/systemd/system/caddy* ; do
 
          if ! grep -q '\[Install\]' "${f}"; then
             # Some services are pulled in by other services and do not need installation.
