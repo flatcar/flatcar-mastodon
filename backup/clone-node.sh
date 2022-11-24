@@ -16,9 +16,9 @@ fi
 remote_address="$(cat "$clone_basedir/source_node")"
 
 remote=("ssh"
-        "-o UserKnownHostsFile=/dev/null"
-        "-o StrictHostKeyChecking=no"
-        "-i ${clone_basedir}/.ssh/backup_key"
+        "-o" "UserKnownHostsFile=/dev/null"
+        "-o" "StrictHostKeyChecking=no"
+        "-i" "${clone_basedir}/.ssh/backup_key"
         "${remote_address}"
         "sudo")
 
