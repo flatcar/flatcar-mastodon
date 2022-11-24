@@ -1,0 +1,6 @@
+# backup ssh keys
+backup/backup_key
+backup/backup_key.pub
+
+# generated ignition files
+*.json

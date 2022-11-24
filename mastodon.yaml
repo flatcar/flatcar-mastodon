@@ -9,6 +9,7 @@ passwd:
     - name: mastodon
       no_create_home: true
       groups: [ docker ]
+    - name: backup
 
 storage:
   directories:
@@ -71,10 +72,11 @@ storage:
         name: mastodon
     - path: /opt/mastodon/public
       mode: 0755
+    # hard-coded in Mastodon container image
       user:
-        name: mastodon
+        id: 991
       group:
-        name: mastodon
+        id: 991
 
     # Monitoring
     - path: /opt/mastodon/grafana
@@ -120,6 +122,10 @@ storage:
       group:
         name: mastodon
 
+    # Backup
+    - path: /opt/backup
+      mode: 0700
+
   files:
     - path: /etc/sysctl.d/99-vm-max-map-count.conf
       mode: 0644
@@ -145,7 +151,7 @@ storage:
       contents:
         local: mastodon/setup-mastodon.sh
     - path: /opt/mastodon/versions.env
-      mode: 0755
+      mode: 0644
       contents:
         local: mastodon/versions.env
 
@@ -229,39 +235,39 @@ storage:
     - path: /opt/mastodon/grafana/dashboards/docker-containers.json
       mode: 0644
       contents:
-        local: monitoring/docker-containers.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/docker-containers.json
     - path: /opt/mastodon/grafana/dashboards/elasticsearch.json
       mode: 0644
       contents:
-        local: monitoring/elasticsearch.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/elasticsearch.json
     - path: /opt/mastodon/grafana/dashboards/host-system.json
       mode: 0644
       contents:
-        local: monitoring/host-system.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/host-system.json
     - path: /opt/mastodon/grafana/dashboards/mastodon.json
       mode: 0644
       contents:
-        local: monitoring/mastodon.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/mastodon.json
     - path: /opt/mastodon/grafana/dashboards/monitoring.json
       mode: 0644
       contents:
-        local: monitoring/monitoring.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/monitoring.json
     - path: /opt/mastodon/grafana/dashboards/postgres.json
       mode: 0644
       contents:
-        local: monitoring/postgres.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/postgres.json
     - path: /opt/mastodon/grafana/dashboards/redis.json
       mode: 0644
       contents:
-        local: monitoring/redis.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/redis.json
     - path: /opt/mastodon/grafana/dashboards/sidekiq.json
       mode: 0644
       contents:
-        local: monitoring/sidekiq.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/sidekiq.json
     - path: /opt/mastodon/grafana/dashboards/caddy.json
       mode: 0644
       contents:
-        local: monitoring/caddy.json
+        source: https://raw.githubusercontent.com/flatcar/flatcar-mastodon/main/monitoring/caddy.json
 
     - path: /etc/systemd/system/metrics-provider-cadvisor.service
       mode: 0644
@@ -299,6 +305,34 @@ storage:
       mode: 0644
       contents:
         local: systemd/monitoring-prometheus.service
+
+    # Backup
+    - path: /opt/backup/backup_client.sh
+      mode: 0500
+      contents:
+        local: backup/backup_client.sh
+    - path: /opt/backup/backup.sh
+      mode: 0500
+      contents:
+        local: backup/backup.sh
+    - path: /opt/backup/restore.sh
+      mode: 0500
+      contents:
+        local: backup/restore.sh
+    - path: /opt/clone/re_initialise.sh
+      mode: 0500
+      contents:
+        local: backup/re_initialise.sh
+    - path: /etc/sudoers.d/backup
+      mode: 0440
+      contents:
+        local: backup/sudoers
+    - path: /home/backup/.ssh/authorized_keys
+      mode: 0444
+      contents:
+        local: backup/backup_key.pub
+      user:
+        name: backup
 
 systemd:
   units:
