@@ -7,6 +7,8 @@ chown mastodon:mastodon /opt/mastodon/mastodon.env
 source /opt/mastodon/versions.env
 chmod 0444 /opt/backup/mastodon_db_backup.sql
 
+# We start the DB container to import the backup SQL dump.
+# Note that the container's health check will not succeed until after the dump was imported.
 echo "Importing mastodon database"
 # We run this in the background instead of using --detach so the log output remains visible
 /usr/bin/docker run --rm  \
@@ -18,7 +20,8 @@ echo "Importing mastodon database"
                   --name=mastodon-db-import \
                   "${POSTGRES_IMAGE}" &
 
-# 20 minutes max for db import
+# 20 minutes max for db import. The DB container can be shut down as soon as the DB is up (healthy)
+# as the SQL import happens before the DB is started in the container.
 /opt/mastodon/wait-for-container.sh mastodon-db-import .State.Health healthy 1200
 /usr/bin/docker stop mastodon-db-import
 
@@ -34,9 +37,6 @@ for f in /etc/systemd/system/mastodon* \
          /etc/systemd/system/monitoring* \
          caddy; do
          u="$(basename "$f")"
-         if [ "$u" = "mastodon-db-import.service" ] ; then
-            continue
-         fi
          systemctl enable "$u"
 done
 
