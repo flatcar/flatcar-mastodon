@@ -51,7 +51,7 @@ cat "${reinit_script}" >> "${tmp_reinit_script}"
 
 trap "rm -f '${0}' '${tmp_reinit_script}'" EXIT
 
-echo "Stopping and disabling all mastodon, monitoring. and web services, and wiping service files."
+echo "Stopping and disabling all mastodon, monitoring and web services, and wiping service files."
 
 systemctl stop "mastodon*" "metrics-provider-*" "monitoring*" "caddy*"
 
