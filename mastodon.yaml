@@ -315,6 +315,14 @@ storage:
       mode: 0500
       contents:
         local: backup/backup.sh
+    - path: /opt/backup/restore.sh
+      mode: 0500
+      contents:
+        local: backup/restore.sh
+    - path: /opt/clone/re_initialise.sh
+      mode: 0500
+      contents:
+        local: backup/re_initialise.sh
     - path: /etc/sudoers.d/backup
       mode: 0440
       contents:
