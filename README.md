@@ -19,6 +19,7 @@ Only instance-specific parameters need to be provided.
 2. An SMTP account for your instance to send notification emails from (any public freemailer account should work).
 3. A cloud service / private cloud / physical server to provision Flatcar on. See 4. below for more information.
 
+**Set-up Instructions**
 1. Clone this repo.
 2. Configure basic settings for your new instance:
    1. Set the domain name and webmaster email address in [`caddy/Caddyfile`](caddy/Caddyfile).
